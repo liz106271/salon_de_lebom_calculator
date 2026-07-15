@@ -1098,25 +1098,27 @@ function orderPageHtml(){
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>訂單明細 - Salon de Lebom</title>
 <style>
   :root{ --ink:#1B0F1F; --panel:#2B1A31; --line:#56395A; --paper:#F7ECF2; --paper-dim:#C9A3C2; --forest:#D43F8D; --mustard:#FF4FA0; }
   *{ box-sizing:border-box; }
   body{ margin:0; padding:24px 20px 60px; background:var(--ink); color:var(--paper); font-family:'Libre Franklin', system-ui, sans-serif; }
-  h1{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:22px; margin:0 0 4px; }
+  .container{ max-width:900px; width:100%; margin:0 auto; }
+  h1{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:clamp(18px, 4vw, 22px); margin:0 0 4px; }
   .sub{ color:var(--paper-dim); font-size:13px; margin:0 0 24px; }
-  .stats{ display:flex; gap:24px; margin-bottom:24px; }
+  .stats{ display:flex; flex-wrap:wrap; gap:24px; margin-bottom:24px; }
   .stat .label{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-dim); }
   .stat .value{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:24px; font-weight:600; }
   .stat .value.total{ color:var(--mustard); }
   h3{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-dim); margin:28px 0 10px; }
-  .item-row{ display:flex; justify-content:space-between; align-items:flex-start; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--line); gap:10px; }
+  .item-row{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--line); gap:10px; }
   .item-row .n{ color:var(--paper-dim); font-family:'IBM Plex Mono', ui-monospace, monospace; }
-  .item-lines{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-  .item-line1{ color:var(--paper); }
-  .item-line2{ font-size:11.5px; color:var(--paper-dim); }
+  .item-lines{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 200px; }
+  .item-line1{ color:var(--paper); overflow-wrap:anywhere; }
+  .item-line2{ font-size:11.5px; color:var(--paper-dim); overflow-wrap:anywhere; }
   .item-amount{ flex:0 0 auto; white-space:nowrap; }
-  .gift-row{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .gift-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
   .gift-check{ width:16px; height:16px; border-radius:50%; border:1px solid var(--paper-dim); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
   .gift-row.unlocked .gift-check{ background:var(--forest); border-color:var(--forest); color:var(--paper); }
   .gift-row .g-name{ font-size:13.5px; }
@@ -1126,19 +1128,21 @@ function orderPageHtml(){
 </style>
 </head>
 <body>
-  <h1>訂單明細</h1>
-  <p class="sub">${new Date().toLocaleString('zh-TW')}</p>
-  <div class="stats">
-    <div class="stat"><div class="label">件數</div><div class="value">${fmtInt(totalItems)}</div></div>
-    <div class="stat"><div class="label">總金額</div><div class="value total">${fmtMoney(totalAmount)}</div></div>
-  </div>
-  <h3>已選商品</h3>
-  ${itemRows || '<p class="no-items">尚未選擇任何商品。</p>'}
-  <h3>滿額贈品</h3>
-  <div class="gift-row${giftCount > 0 ? ' unlocked' : ''}">
-    <span class="gift-check">${giftCount > 0 ? '✓' : ''}</span>
-    <span class="g-name">${GIFT_NAME}</span>
-    <span class="g-req">已獲得 ${giftCount} / ${GIFT_MAX} 張</span>
+  <div class="container">
+    <h1>訂單明細</h1>
+    <p class="sub">${new Date().toLocaleString('zh-TW')}</p>
+    <div class="stats">
+      <div class="stat"><div class="label">件數</div><div class="value">${fmtInt(totalItems)}</div></div>
+      <div class="stat"><div class="label">總金額</div><div class="value total">${fmtMoney(totalAmount)}</div></div>
+    </div>
+    <h3>已選商品</h3>
+    ${itemRows || '<p class="no-items">尚未選擇任何商品。</p>'}
+    <h3>滿額贈品</h3>
+    <div class="gift-row${giftCount > 0 ? ' unlocked' : ''}">
+      <span class="gift-check">${giftCount > 0 ? '✓' : ''}</span>
+      <span class="g-name">${GIFT_NAME}</span>
+      <span class="g-req">已獲得 ${giftCount} / ${GIFT_MAX} 張</span>
+    </div>
   </div>
 </body>
 </html>`;
