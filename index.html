@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salon de Lebom韓國線下購物清單計算器</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:        #1B0F1F;
+    --panel:      #2B1A31;
+    --panel-2:    #35213C;
+    --line:       #56395A;
+    --paper:      #F7ECF2;
+    --paper-dim:  #C9A3C2;
+    --forest:     #D43F8D;
+    --forest-lt:  #EF5DA8;
+    --stamp:      #C93368;
+    --mustard:    #FF4FA0;
+
+    --font-display: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-body: 'Libre Franklin', system-ui, sans-serif;
+
+    --ticket-h-collapsed: 118px;
+    --ticket-h-expanded: 320px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% 0%, rgba(212,63,141,.16), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 10%, rgba(140,60,150,.14), transparent 60%),
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding-bottom: calc(var(--ticket-h-collapsed) + 24px);
+  }
+
+  body.ticket-open{
+    padding-bottom: calc(var(--ticket-h-expanded) + 24px);
+  }
+
+  a{ color:inherit; }
+
+  ::selection{ background:var(--mustard); color:var(--ink); }
+
+  :focus-visible{
+    outline: 2px solid var(--mustard);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Header ---------- */
+  .site-header{
+    padding: 28px 20px 18px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .eyebrow{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--mustard);
+    margin: 0 0 6px;
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .01em;
+    font-size: clamp(28px, 5vw, 44px);
+    margin: 0 0 4px;
+    color: var(--paper);
+  }
+
+  .subhead{
+    color: var(--paper-dim);
+    font-size: 15px;
+    margin: 0 0 22px;
+    max-width: 56ch;
+  }
+
+  .filter-row{
+    display:flex;
+    gap:12px;
+    flex-wrap: wrap;
+    align-items:center;
+  }
+
+  .search-wrap{
+    position:relative;
+    flex: 1 1 280px;
+    min-width: 220px;
+  }
+
+  .search-wrap svg{
+    position:absolute;
+    left:14px; top:50%;
+    transform:translateY(-50%);
+    width:16px; height:16px;
+    opacity:.55;
+  }
+
+  #search{
+    width:100%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px 12px 38px;
+    border-radius: 3px;
+  }
+  #search::placeholder{ color: var(--paper-dim); }
+
+  .chip-line{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:nowrap;
+  }
+  .chip-line + .chip-line{ margin-top:8px; }
+
+  .chip-label{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    flex: 0 0 auto;
+    width: 44px;
+  }
+
+  .chip-scroll{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .chip-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .chip-row::-webkit-scrollbar{ display:none; }
+
+  .chip-arrow{
+    display:none;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:center;
+    width:26px;
+    height:26px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--paper-dim);
+    border-radius: 999px;
+    cursor:pointer;
+    font-family: var(--font-display);
+    font-size: 14px;
+    line-height:1;
+    padding:0;
+  }
+  .chip-arrow:hover{ border-color: var(--forest-lt); color: var(--paper); }
+  .chip-arrow.visible{ display:flex; }
+
+  .chip{
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--paper-dim);
+    padding: 9px 13px;
+    border-radius: 999px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition: all .15s ease;
+  }
+  .chip:hover{ border-color: var(--forest-lt); color: var(--paper); }
+  .chip[aria-pressed="true"]{
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--paper);
+  }
+
+  .result-count{
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--paper-dim);
+    margin: 14px 2px 0;
+  }
+
+  /* ---------- Catalog ---------- */
+  main{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 10px 20px 30px;
+  }
+
+  #catalog{
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .category-block{
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: rgba(255,255,255,.015);
+  }
+
+  .category-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background: var(--panel-2);
+    border:none;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 12px 16px;
+    cursor:pointer;
+    border-radius: 4px;
+    text-align:left;
+  }
+  .category-header:hover{ background: var(--forest); }
+
+  .category-header .cat-name::before{
+    content: "▾ ";
+    display:inline-block;
+  }
+  .category-header[aria-expanded="false"] .cat-name::before{
+    content: "▸ ";
+  }
+
+  .category-header .cat-count{
+    font-size: 11px;
+    color: var(--paper-dim);
+    font-weight: 400;
+  }
+  .category-header:hover .cat-count{ color: var(--paper); }
+
+  .category-body{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    padding: 10px;
+  }
+  .category-body[hidden]{ display:none; }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 12px;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:16px;
+    position:relative;
+    transition: border-color .15s ease;
+  }
+  .card:has(.qty-input[data-active="true"]){
+    border-color: var(--forest-lt);
+  }
+
+  .card .info{
+    flex: 1 1 auto;
+    min-width: 0;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .card .sku{
+    position:absolute;
+    top:10px; right:12px;
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: .06em;
+    color: var(--paper-dim);
+    border: 1px dashed var(--line);
+    padding: 2px 6px;
+    border-radius: 2px;
+    transform: rotate(2deg);
+  }
+
+  .card .series{
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--mustard);
+    padding-right: 60px;
+  }
+
+  .card .name{
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 17px;
+    line-height:1.25;
+    color: var(--paper);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .card .subname{
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--paper-dim);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .cat-subname{
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--paper-dim);
+    font-weight: 400;
+  }
+
+  .card .price{
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--paper-dim);
+  }
+  .card .price b{ color: var(--paper); font-weight:600; }
+
+  .stepper{
+    flex: 0 0 auto;
+    display:flex;
+    align-items:stretch;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow:hidden;
+    width: 132px;
+  }
+
+  .stepper button{
+    background: var(--panel-2);
+    border:none;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 17px;
+    width: 40px;
+    cursor:pointer;
+    transition: background .15s ease;
+  }
+  .stepper button:hover{ background: var(--forest); }
+  .stepper button:active{ background: var(--forest-lt); }
+  .stepper button:disabled{
+    opacity: .35;
+    cursor: not-allowed;
+    background: var(--panel-2);
+  }
+
+  .qty-input{
+    flex:1;
+    width: 100%;
+    background: var(--ink);
+    border:none;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 16px;
+    text-align:center;
+    -moz-appearance: textfield;
+  }
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+
+  .card.has-qty{
+    background: linear-gradient(180deg, rgba(212,63,141,.18), var(--panel) 60%);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 50px 20px;
+    color: var(--paper-dim);
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: .04em;
+  }
+
+  @media (max-width: 520px){
+    .card{
+      flex-wrap: wrap;
+      align-items:flex-start;
+    }
+    .card .info{ flex: 1 1 100%; }
+    .stepper{ width: 100%; margin-top: 8px; }
+  }
+
+  /* ---------- Ticket (fixed summary) ---------- */
+  #ticket{
+    position: fixed;
+    left:0; right:0; bottom:0;
+    z-index: 40;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 30px rgba(0,0,0,.35);
+  }
+
+  #ticket::before{
+    content:"";
+    display:block;
+    height: 9px;
+    width:100%;
+    background:
+      linear-gradient(-45deg, var(--ink) 6px, transparent 0),
+      linear-gradient(45deg, var(--ink) 6px, transparent 0);
+    background-position: left top;
+    background-size: 12px 12px;
+    background-repeat: repeat-x;
+  }
+
+  .ticket-inner{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 14px 20px 16px;
+  }
+
+  .ticket-summary{
+    display:flex;
+    align-items:center;
+    gap: 22px;
+    flex-wrap:wrap;
+  }
+
+  .ticket-stat{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .ticket-stat .label{
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform:uppercase;
+    color: var(--paper-dim);
+  }
+  .ticket-stat .value{
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight:600;
+    color: var(--paper);
+  }
+  .ticket-stat .value.total{ color: var(--mustard); }
+
+  .ticket-gift-hint{
+    flex: 1 1 220px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--paper-dim);
+    min-width: 200px;
+  }
+  .ticket-gift-hint b{ color: var(--stamp); font-weight:600; }
+
+  #toggleTicket{
+    background: var(--forest);
+    color: var(--paper);
+    border:none;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: .05em;
+    text-transform:uppercase;
+    padding: 10px 16px;
+    border-radius: 3px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  #toggleTicket:hover{ background: var(--forest-lt); }
+
+  #exportBtn, #importBtn{
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid var(--line);
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: .05em;
+    text-transform:uppercase;
+    padding: 10px 16px;
+    border-radius: 3px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  #exportBtn:hover, #importBtn:hover{ border-color: var(--mustard); color: var(--mustard); }
+
+  .ticket-detail{
+    display:none;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    max-height: 200px;
+    overflow-y:auto;
+  }
+  body.ticket-open .ticket-detail{ display:block; }
+
+  .detail-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 720px){
+    .detail-grid{ grid-template-columns: 1fr; }
+  }
+
+  .detail-col h3{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform:uppercase;
+    color: var(--paper-dim);
+    margin: 0 0 10px;
+  }
+
+  .item-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-size: 13.5px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 10px;
+  }
+  .item-row .n{ color: var(--paper-dim); font-family: var(--font-display); }
+  .item-lines{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .item-line1{ color: var(--paper); }
+  .item-line2{ font-size: 11.5px; color: var(--paper-dim); }
+  .item-amount{ flex: 0 0 auto; white-space:nowrap; }
+
+  .gift-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .gift-check{
+    width:16px; height:16px;
+    border-radius: 50%;
+    border: 1px solid var(--paper-dim);
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 10px;
+  }
+  .gift-row.unlocked .gift-check{
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--paper);
+  }
+  .gift-row .g-name{ font-size: 13.5px; }
+  .gift-row.unlocked .g-name{ color: var(--paper); }
+  .gift-row:not(.unlocked) .g-name{ color: var(--paper-dim); }
+  .gift-row .g-req{
+    margin-left:auto;
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+
+  .no-items{ color: var(--paper-dim); font-size: 13px; padding: 4px 0; }
+
+  @media (max-width: 560px){
+    .ticket-summary{ gap: 14px; }
+    .ticket-stat .value{ font-size: 18px; }
+    #toggleTicket{ margin-left:auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <p class="eyebrow">Order Calculator</p>
+  <h1>𝑺𝒂𝒍𝒐𝒏 𝒅𝒆 𝑳𝒆𝒃𝒐𝒎</h1>
+  <p class="subhead">2026.07.11 – 2026.08.16</p>
+
+  <div class="filter-row">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="搜尋作品名稱或商品種類…" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="chip-line">
+    <span class="chip-label">分類</span>
+    <div class="chip-scroll">
+      <button type="button" class="chip-arrow prev" id="categoryChipPrev" aria-label="向左捲動">‹</button>
+      <div class="chip-row" id="categoryChipRow" role="group" aria-label="依商品種類篩選"></div>
+      <button type="button" class="chip-arrow next" id="categoryChipNext" aria-label="向右捲動">›</button>
+    </div>
+  </div>
+  <div class="chip-line">
+    <span class="chip-label">作品</span>
+    <div class="chip-scroll">
+      <button type="button" class="chip-arrow prev" id="seriesChipPrev" aria-label="向左捲動">‹</button>
+      <div class="chip-row" id="seriesChipRow" role="group" aria-label="依作品篩選"></div>
+      <button type="button" class="chip-arrow next" id="seriesChipNext" aria-label="向右捲動">›</button>
+    </div>
+  </div>
+
+  <p class="result-count" id="resultCount"></p>
+</header>
+
+<main>
+  <div id="catalog"></div>
+</main>
+
+<footer id="ticket">
+  <div class="ticket-inner">
+    <div class="ticket-summary">
+      <div class="ticket-stat">
+        <span class="label">件數</span>
+        <span class="value" id="statItems">0</span>
+      </div>
+      <div class="ticket-stat">
+        <span class="label">總金額</span>
+        <span class="value total" id="statTotal">KRW ₩0</span>
+      </div>
+      <p class="ticket-gift-hint" id="giftHint" aria-live="polite"></p>
+      <button id="exportBtn" type="button">匯出清單</button>
+      <button id="importBtn" type="button">匯入清單</button>
+      <input id="importFile" type="file" accept=".csv" style="display:none">
+      <button id="toggleTicket" type="button" aria-expanded="false">查看清單</button>
+    </div>
+
+    <div class="ticket-detail" id="ticketDetail">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <h3>已選商品</h3>
+          <div id="itemList"></div>
+        </div>
+        <div class="detail-col">
+          <h3>滿額贈品</h3>
+          <div id="giftList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+const CONFIG = {
+  currency: '₩',        // shown before every price/total
+  locale: 'zh-TW',        // used to format numbers, e.g. 1,234
+  decimals: 0,            // no cents needed for whole-dollar NTD prices
+};
+
+const SERIES_LIST = [
+  { series: '和平之上',       subseries: '주의 평화' },
+  { series: '今晚溫柔點',      subseries: '밤은 부드러워라' },
+  { series: '神結',           subseries: '신결' },
+  { series: 'Full Book',      subseries: '풀북' },
+  { series: '星期一的救贖',    subseries: '월요일의 구원자' },
+  { series: '親屬肝係證明書',  subseries: '가족간계증명서' },
+  { series: '浪漫啟示錄',      subseries: '낭만 묵시록' },
+  { series: '無根之樹',        subseries: '뿌리 없는 나무' },
+];
+
+const CATEGORY_LIST = [
+  { category: '壓克力立牌',         subcategory: '아크릴 스탠드', price: 15000, limited: 3, note: '' },
+  { category: '甜點壓克力立牌',      subcategory: '스위츠 아크릴 스탠드', price: 15000, limited: 3, note: '每份含壓克力立牌1塊，小卡1張' },
+  { category: '女僕執事壓克力套組',  subcategory: '메이드와 집사 아크릴 블록', price: 30000, limited: 3, note: '每份含壓克力磚1塊，拍立得透卡2張' },
+  { category: 'SD飯友套組',          subcategory: 'SD 커플 아크릴 블록', price: 15000, limited: 3, note: '每份含壓克力飯友1塊，小卡1張' },
+  { category: '名牌吊飾組',          subcategory: '네임 플레이트 패키지', price: 13500, limited: 3, note: '每份含名牌壓克力板1塊，餅乾吊飾1份' },
+  { category: 'Lebom限定相卡',       subcategory: '레봄 필름 인화 사진', price: 2000,  limited: 5, note: '' },
+  { category: 'Lebom限定貼紙',       subcategory: '레봄 조각 스티커', price: 2000,  limited: 5, note: '' },
+];
+
+const RANDOM_CATEGORY_LIST = [
+  { category: '隨機拍立得',             subcategory: '데코 포토팩', price: 5000,  limited: 10, note: '每份8種中隨機1種，每份含寫真1張，小卡1張' },
+  { category: '隨機壓克力磁鐵',         subcategory: '스위츠 아크릴 마그넷', price: 7000,  limited: 10, note: '每份8種中隨機1種' },
+  { category: '隨機愛心徽章',           subcategory: '하트 캔뱃지', price: 5000,  limited: 10, note: '每份8種中隨機1種' },
+  { category: '隨機愛心徽章壓克力框架', subcategory: '아크릴 캔뱃지 프레임', price: 17000, limited: 3,  note: '' },
+  { category: '隨機卡包',               subcategory: '컬렉션 포토카드', price: 5000,  limited: 10, note: '每份16種中隨機3種' },
+];
+
+const NAME_LIST = [
+  // 壓克力立牌 — 每個作品 2 個角色
+  { category: '壓克力立牌', series: '和平之上',       name: '安和平(攻)', subname: '안평화' },
+  { category: '壓克力立牌', series: '和平之上',       name: '朱仁徹(受)', subname: '주인철' },
+  { category: '壓克力立牌', series: '神結',           name: '鄭泰伍(攻)', subname: '정태오' },
+  { category: '壓克力立牌', series: '神結',           name: '趙之遠(受)', subname: '조지원' },
+  { category: '壓克力立牌', series: '今晚溫柔點',      name: '高希宰(攻)', subname: '고희재' },
+  { category: '壓克力立牌', series: '今晚溫柔點',      name: '鮮于真(受)', subname: '선우진' },
+  { category: '壓克力立牌', series: 'Full Book',      name: '閔皓淵(攻)', subname: '민호연' },
+  { category: '壓克力立牌', series: 'Full Book',      name: '崔在昇(受)', subname: '최재승' },
+  { category: '壓克力立牌', series: '星期一的救贖',    name: '具允元(攻)', subname: '구윤원' },
+  { category: '壓克力立牌', series: '星期一的救贖',    name: '元燿日(受)', subname: '원요일' },
+  { category: '壓克力立牌', series: '親屬肝係證明書',  name: '九緣書(攻)', subname: '구연서' },
+  { category: '壓克力立牌', series: '親屬肝係證明書',  name: '柳珉赫(受)', subname: '유민혁' },
+  { category: '壓克力立牌', series: '浪漫啟示錄',      name: '廉泰華(攻)', subname: '염태화' },
+  { category: '壓克力立牌', series: '浪漫啟示錄',      name: '蔡定鉉(受)', subname: '채정현' },
+  { category: '壓克力立牌', series: '無根之樹',        name: '權熙書(攻)', subname: '권희서' },
+  { category: '壓克力立牌', series: '無根之樹',        name: '車泰京(受)', subname: '차태경' },
+  
+  { category: '甜點壓克力立牌', series: '和平之上',       name: '安和平(攻)', subname: '안평화' },
+  { category: '甜點壓克力立牌', series: '和平之上',       name: '朱仁徹(受)', subname: '주인철' },
+  { category: '甜點壓克力立牌', series: '神結',           name: '鄭泰伍(攻)', subname: '정태오' },
+  { category: '甜點壓克力立牌', series: '神結',           name: '趙之遠(受)', subname: '조지원' },
+  { category: '甜點壓克力立牌', series: '今晚溫柔點',      name: '高希宰(攻)', subname: '고희재' },
+  { category: '甜點壓克力立牌', series: '今晚溫柔點',      name: '鮮于真(受)', subname: '선우진' },
+  { category: '甜點壓克力立牌', series: 'Full Book',      name: '閔皓淵(攻)', subname: '민호연' },
+  { category: '甜點壓克力立牌', series: 'Full Book',      name: '崔在昇(受)', subname: '최재승' },
+  { category: '甜點壓克力立牌', series: '星期一的救贖',    name: '具允元(攻)', subname: '구윤원' },
+  { category: '甜點壓克力立牌', series: '星期一的救贖',    name: '元燿日(受)', subname: '원요일' },
+  { category: '甜點壓克力立牌', series: '親屬肝係證明書',  name: '九緣書(攻)', subname: '구연서' },
+  { category: '甜點壓克力立牌', series: '親屬肝係證明書',  name: '柳珉赫(受)', subname: '유민혁' },
+  { category: '甜點壓克力立牌', series: '浪漫啟示錄',      name: '廉泰華(攻)', subname: '염태화' },
+  { category: '甜點壓克力立牌', series: '浪漫啟示錄',      name: '蔡定鉉(受)', subname: '채정현' },
+  { category: '甜點壓克力立牌', series: '無根之樹',        name: '權熙書(攻)', subname: '권희서' },
+  { category: '甜點壓克力立牌', series: '無根之樹',        name: '車泰京(受)', subname: '차태경' },
+
+  ...['Lebom限定相卡', '女僕執事壓克力套組', 'SD飯友套組', '名牌吊飾組', 'Lebom限定貼紙'].flatMap(category =>
+    SERIES_LIST.map(({ series, subseries }) => ({ category, series, name: series, subname: subseries }))
+  ),
+
+  // 隨機商品（沒有 series）
+  ...RANDOM_CATEGORY_LIST.map(({ category }) => ({ category, series: null, name: category, subname: '' })),
+];
+
+let _nextId = 1;
+const PRODUCTS = NAME_LIST.map(n => {
+  const cat = [...CATEGORY_LIST, ...RANDOM_CATEGORY_LIST].find(c => c.category === n.category);
+  const ser = n.series ? SERIES_LIST.find(s => s.series === n.series) : null;
+  const id = _nextId++;
+  return {
+    id,
+    series: n.series,
+    subseries: ser ? ser.subseries : null,
+    name: n.name,
+    subname: n.subname,
+    category: n.category,
+    subcategory: cat.subcategory,
+    note: cat.note,
+    price: cat.price,
+    limited: cat.limited,
+  };
+});
+
+// category 的預設顯示/篩選順序：一般商品種類接著隨機商品種類。
+const CATEGORY_ORDER = [...CATEGORY_LIST, ...RANDOM_CATEGORY_LIST].map(c => c.category);
+
+// 消費滿額贈品規則：每消費滿一定金額就送 1 張贈品，最多送到上限張數。
+const GIFT_TIER_AMOUNT = 50000;
+const GIFT_NAME = 'ver.B 증정(구매금액)';
+const GIFT_MAX = 4;
+
+
+/* ===================== everything below is generic ===================== */
+
+const state = {
+  qty: Object.fromEntries(PRODUCTS.map(p => [p.id, 0])),
+  search: '',
+  seriesFilter: null,
+  categoryFilter: null,
+  collapsedCategories: new Set(),
+};
+
+const fmtMoney = n => CONFIG.currency + n.toLocaleString(CONFIG.locale, { minimumFractionDigits: CONFIG.decimals ?? 2, maximumFractionDigits: CONFIG.decimals ?? 2 });
+const fmtInt = n => n.toLocaleString(CONFIG.locale);
+
+const catalogEl   = document.getElementById('catalog');
+const categoryChipRowEl = document.getElementById('categoryChipRow');
+const seriesChipRowEl   = document.getElementById('seriesChipRow');
+const searchEl    = document.getElementById('search');
+const resultCountEl = document.getElementById('resultCount');
+const statItemsEl = document.getElementById('statItems');
+const statTotalEl = document.getElementById('statTotal');
+const giftHintEl  = document.getElementById('giftHint');
+const itemListEl  = document.getElementById('itemList');
+const giftListEl  = document.getElementById('giftList');
+const toggleBtn   = document.getElementById('toggleTicket');
+
+function uniqueSeries(){
+  return [...new Set(PRODUCTS.map(p => p.series).filter(Boolean))];
+}
+
+function uniqueCategories(){
+  const present = new Set(PRODUCTS.map(p => p.category));
+  return CATEGORY_ORDER.filter(c => present.has(c));
+}
+
+// Wires a chip row up to its prev/next scroll buttons: clicking scrolls the
+// row, and the buttons only show up once/while the row's content overflows.
+function setupChipScroller(rowEl, prevBtn, nextBtn){
+  function updateArrows(){
+    const overflowing = rowEl.scrollWidth > rowEl.clientWidth + 1;
+    prevBtn.classList.toggle('visible', overflowing && rowEl.scrollLeft > 0);
+    nextBtn.classList.toggle('visible', overflowing && rowEl.scrollLeft < rowEl.scrollWidth - rowEl.clientWidth - 1);
+  }
+  prevBtn.addEventListener('click', () => rowEl.scrollBy({ left: -160, behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => rowEl.scrollBy({ left: 160, behavior: 'smooth' }));
+  rowEl.addEventListener('scroll', updateArrows);
+  window.addEventListener('resize', updateArrows);
+  return updateArrows;
+}
+
+const updateCategoryChipArrows = setupChipScroller(categoryChipRowEl, document.getElementById('categoryChipPrev'), document.getElementById('categoryChipNext'));
+const updateSeriesChipArrows = setupChipScroller(seriesChipRowEl, document.getElementById('seriesChipPrev'), document.getElementById('seriesChipNext'));
+
+function buildCategoryChips(){
+  categoryChipRowEl.innerHTML = '';
+  uniqueCategories().forEach(category => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.type = 'button';
+    btn.textContent = category;
+    btn.setAttribute('aria-pressed', state.categoryFilter === category ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      state.categoryFilter = state.categoryFilter === category ? null : category;
+      buildCategoryChips();
+      renderCatalog();
+    });
+    categoryChipRowEl.appendChild(btn);
+  });
+  updateCategoryChipArrows();
+}
+
+function buildSeriesChips(){
+  seriesChipRowEl.innerHTML = '';
+  uniqueSeries().forEach(series => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.type = 'button';
+    btn.textContent = series;
+    btn.setAttribute('aria-pressed', state.seriesFilter === series ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      state.seriesFilter = state.seriesFilter === series ? null : series;
+      buildSeriesChips();
+      renderCatalog();
+    });
+    seriesChipRowEl.appendChild(btn);
+  });
+  updateSeriesChipArrows();
+}
+
+function matchesFilter(p){
+  const term = state.search.trim().toLowerCase();
+  const matchesCategory = !state.categoryFilter || p.category === state.categoryFilter;
+  const matchesSeries = !state.seriesFilter || p.series === state.seriesFilter;
+  const matchesSearch = !term
+    || (p.series && p.series.toLowerCase().includes(term))
+    || p.category.toLowerCase().includes(term)
+    || p.name.toLowerCase().includes(term)
+    || (p.subname && p.subname.toLowerCase().includes(term));
+  return matchesCategory && matchesSeries && matchesSearch;
+}
+
+function makeCard(p){
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.dataset.id = p.id;
+
+  card.innerHTML = `
+    <span class="sku">限量 ${p.limited}${p.note ? ' · ' + p.note : ''}</span>
+    <div class="info">
+      <p class="series">${p.series || '隨機商品'}</p>
+      <h2 class="name">${p.name}</h2>
+      <p class="subname">${p.subname ? `${p.subname}．` : ''}<b>${fmtMoney(p.price)}</b></p>
+    </div>
+    <div class="stepper">
+      <button type="button" class="dec" aria-label="減少「${p.name}」數量">−</button>
+      <input class="qty-input" type="number" min="0" max="${p.limited}" step="1" inputmode="numeric"
+             value="${state.qty[p.id]}" aria-label="「${p.name}」數量">
+      <button type="button" class="inc" aria-label="增加「${p.name}」數量">+</button>
+    </div>
+  `;
+
+  const input = card.querySelector('.qty-input');
+  const dec = card.querySelector('.dec');
+  const inc = card.querySelector('.inc');
+
+  function setQty(n){
+    n = Math.max(0, Math.min(p.limited, Math.floor(Number.isFinite(n) ? n : 0)));
+    state.qty[p.id] = n;
+    input.value = n;
+    card.classList.toggle('has-qty', n > 0);
+    inc.disabled = n >= p.limited;
+    dec.disabled = n <= 0;
+    updateTicket();
+  }
+
+  dec.addEventListener('click', () => setQty(state.qty[p.id] - 1));
+  inc.addEventListener('click', () => setQty(state.qty[p.id] + 1));
+  input.addEventListener('input', () => setQty(parseInt(input.value, 10)));
+  input.addEventListener('blur', () => setQty(parseInt(input.value, 10) || 0));
+
+  setQty(state.qty[p.id]);
+  return card;
+}
+
+function renderCatalog(){
+  catalogEl.innerHTML = '';
+  const visible = PRODUCTS.filter(matchesFilter);
+
+  if (visible.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.textContent = '沒有符合搜尋條件的商品。';
+    catalogEl.appendChild(empty);
+  } else {
+    const bySeries = new Map(SERIES_LIST.map((s, i) => [s, i]));
+    const byCategory = new Map(CATEGORY_ORDER.map((c, i) => [c, i]));
+
+    const grouped = new Map();
+    visible.forEach(p => {
+      if (!grouped.has(p.category)) grouped.set(p.category, []);
+      grouped.get(p.category).push(p);
+    });
+
+    [...grouped.keys()]
+      .sort((a, b) => byCategory.get(a) - byCategory.get(b))
+      .forEach(category => {
+        const products = grouped.get(category)
+          .sort((a, b) => (bySeries.get(a.series) ?? -1) - (bySeries.get(b.series) ?? -1));
+
+        const collapsed = state.collapsedCategories.has(category);
+
+        const block = document.createElement('section');
+        block.className = 'category-block';
+
+        const header = document.createElement('button');
+        header.type = 'button';
+        header.className = 'category-header';
+        header.setAttribute('aria-expanded', String(!collapsed));
+        const subcategory = products[0].subcategory;
+        header.innerHTML = `<span class="cat-name">${category}${subcategory ? `<span class="cat-subname"> · ${subcategory}</span>` : ''}</span><span class="cat-count">${products.length} 項</span>`;
+        header.addEventListener('click', () => {
+          if (state.collapsedCategories.has(category)) state.collapsedCategories.delete(category);
+          else state.collapsedCategories.add(category);
+          renderCatalog();
+        });
+
+        const body = document.createElement('div');
+        body.className = 'category-body';
+        if (collapsed) body.hidden = true;
+        products.forEach(p => body.appendChild(makeCard(p)));
+
+        block.appendChild(header);
+        block.appendChild(body);
+        catalogEl.appendChild(block);
+      });
+  }
+
+  resultCountEl.textContent = `顯示 ${visible.length} / ${PRODUCTS.length} 項商品`;
+}
+
+function computeCart(){
+  const lines = PRODUCTS
+    .map(p => ({ ...p, qty: state.qty[p.id] }))
+    .filter(l => l.qty > 0);
+
+  const totalItems = lines.reduce((sum, l) => sum + l.qty, 0);
+  const totalAmount = lines.reduce((sum, l) => sum + l.qty * l.price, 0);
+
+  return { lines, totalItems, totalAmount };
+}
+
+function updateTicket(){
+  const { lines, totalItems, totalAmount } = computeCart();
+
+  statItemsEl.textContent = fmtInt(totalItems);
+  statTotalEl.textContent = fmtMoney(totalAmount);
+
+  // Items breakdown
+  itemListEl.innerHTML = '';
+  if (lines.length === 0){
+    itemListEl.innerHTML = '<p class="no-items">尚未選擇任何商品。</p>';
+  } else {
+    lines.forEach(l => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const line1 =(l.series === l.name ? [l.category, l.series]: [l.category, l.series, l.name]).filter(Boolean).join('．');
+      const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries]: [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
+      row.innerHTML = `
+        <div class="item-lines">
+          <div class="item-line1">${line1} <span class="n">×${l.qty}</span></div>
+          ${line2 ? `<div class="item-line2">${line2}</div>` : ''}
+        </div>
+        <span class="item-amount">${fmtMoney(l.qty * l.price)}</span>
+      `;
+      itemListEl.appendChild(row);
+    });
+  }
+
+  // Gift progress — 1 gift per GIFT_TIER_AMOUNT spent, capped at GIFT_MAX
+  const giftCount = Math.min(GIFT_MAX, Math.floor(totalAmount / GIFT_TIER_AMOUNT));
+  const maxedOut = giftCount >= GIFT_MAX;
+
+  giftListEl.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'gift-row' + (giftCount > 0 ? ' unlocked' : '');
+  row.innerHTML = `
+    <span class="gift-check">${giftCount > 0 ? '✓' : ''}</span>
+    <span class="g-name">${GIFT_NAME}</span>
+    <span class="g-req">已獲得 ${giftCount} / ${GIFT_MAX} 張</span>
+  `;
+  giftListEl.appendChild(row);
+
+  // Hint line in the collapsed summary
+  if (maxedOut){
+    giftHintEl.innerHTML = `<b>已獲得全部 ${GIFT_MAX} 張 ${GIFT_NAME}</b> 🎉`;
+  } else {
+    const remaining = (giftCount + 1) * GIFT_TIER_AMOUNT - totalAmount;
+    giftHintEl.innerHTML = `已獲得 <b>${giftCount} / ${GIFT_MAX}</b> 張 ${GIFT_NAME}，再加購 <b>${fmtMoney(remaining)}</b> 即可再得一張`;
+  }
+}
+
+function csvEscape(v){
+  const s = String(v ?? '');
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function exportCart(){
+  const { lines, totalItems, totalAmount } = computeCart();
+  if (lines.length === 0){
+    alert('尚未選擇任何商品，無法匯出。');
+    return;
+  }
+
+  const rows = [
+    ['分類', '作品', '名稱', '原文分類', '原文作品', '原文名稱', '單價', '數量', '小計'],
+    ...lines.map(l => [
+      l.category, l.series || '', l.name,
+      l.subcategory || '', l.subseries || '', l.subname || '',
+      l.price, l.qty, l.qty * l.price,
+    ]),
+    [],
+    ['總件數', totalItems],
+    ['總金額', totalAmount],
+  ];
+
+  const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  a.href = url;
+  a.download = `購買清單_${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+const exportBtn = document.getElementById('exportBtn');
+exportBtn.addEventListener('click', exportCart);
+
+function parseCsvLine(line){
+  const cells = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if (inQuotes){
+      if (ch === '"'){
+        if (line[i + 1] === '"'){ cur += '"'; i++; }
+        else { inQuotes = false; }
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"'){
+      inQuotes = true;
+    } else if (ch === ','){
+      cells.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  cells.push(cur);
+  return cells;
+}
+
+function importCart(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result).replace(/^﻿/, '');
+    const rawLines = text.split(/\r\n|\n/);
+    const lines = rawLines.slice(1); // skip header row
+
+    const qtyById = Object.fromEntries(PRODUCTS.map(p => [p.id, 0]));
+    let importedCount = 0;
+    let notFoundCount = 0;
+
+    for (const line of lines){
+      if (!line.trim()) break;
+      const cells = parseCsvLine(line);
+      const [category, series, name, , , , , qtyStr] = cells;
+      if (category === '總件數' || category === '總金額') break;
+
+      const qty = parseInt(qtyStr, 10);
+      if (!qty) continue;
+
+      const product = PRODUCTS.find(p =>
+        p.category === category && (p.series || '') === series && p.name === name
+      );
+      if (product){
+        qtyById[product.id] = Math.min(qty, product.limited);
+        importedCount++;
+      } else {
+        notFoundCount++;
+      }
+    }
+
+    state.qty = qtyById;
+    renderCatalog();
+    updateTicket();
+
+    alert(notFoundCount > 0
+      ? `已匯入 ${importedCount} 筆，其中 ${notFoundCount} 筆找不到對應商品。`
+      : `已匯入 ${importedCount} 筆。`);
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+const importBtn = document.getElementById('importBtn');
+const importFileEl = document.getElementById('importFile');
+importBtn.addEventListener('click', () => importFileEl.click());
+importFileEl.addEventListener('change', () => {
+  const file = importFileEl.files[0];
+  if (file) importCart(file);
+  importFileEl.value = '';
+});
+
+searchEl.addEventListener('input', () => {
+  state.search = searchEl.value;
+  renderCatalog();
+});
+
+toggleBtn.addEventListener('click', () => {
+  const open = !document.body.classList.contains('ticket-open');
+  document.body.classList.toggle('ticket-open', open);
+  toggleBtn.setAttribute('aria-expanded', String(open));
+  toggleBtn.textContent = open ? '收合清單' : '查看清單';
+});
+
+buildCategoryChips();
+buildSeriesChips();
+renderCatalog();
+updateTicket();
+</script>
+</body>
+</html>
