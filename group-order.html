@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Salon de Lebom韓國線下購物清單計算器</title>
+<title>團購管理 - Salon de Lebom</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,39 +13,56 @@
 <body>
 
 <header class="site-header">
-  <p class="eyebrow">Order Calculator</p>
-  <h1>𝑺𝒂𝒍𝒐𝒏 𝒅𝒆 𝑳𝒆𝒃𝒐𝒎</h1>
-  <p class="subhead">2026.07.11 – 2026.08.16</p>
+  <p class="eyebrow">Group Order Manager</p>
+  <h1>𝑺𝒂𝒍𝒐𝒏 𝒅𝒆 𝑳𝒆𝒃𝒐𝒎 代購</h1>
 
-  <div class="filter-row">
-    <div class="search-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="search" type="text" placeholder="搜尋作品名稱或商品種類…" autocomplete="off">
+  <div class="participant-bar">
+    <div class="participant-add">
+      <input id="participantNameInput" type="text" placeholder="輸入跟團者名稱" autocomplete="off">
+      <button id="addParticipantBtn" type="button">新增跟團者</button>
     </div>
-  </div>
-
-  <div class="chip-line">
-    <span class="chip-label">分類</span>
     <div class="chip-scroll">
-      <button type="button" class="chip-arrow prev" id="categoryChipPrev" aria-label="向左捲動">‹</button>
-      <div class="chip-row" id="categoryChipRow" role="group" aria-label="依商品種類篩選"></div>
-      <button type="button" class="chip-arrow next" id="categoryChipNext" aria-label="向右捲動">›</button>
+      <button type="button" class="chip-arrow prev" id="participantChipPrev" aria-label="向左捲動">‹</button>
+      <div class="chip-row" id="participantChipRow" role="group" aria-label="跟團者列表"></div>
+      <button type="button" class="chip-arrow next" id="participantChipNext" aria-label="向右捲動">›</button>
     </div>
-  </div>
-  <div class="chip-line">
-    <span class="chip-label">作品</span>
-    <div class="chip-scroll">
-      <button type="button" class="chip-arrow prev" id="seriesChipPrev" aria-label="向左捲動">‹</button>
-      <div class="chip-row" id="seriesChipRow" role="group" aria-label="依作品篩選"></div>
-      <button type="button" class="chip-arrow next" id="seriesChipNext" aria-label="向右捲動">›</button>
+    <div>
+      <button type="button" class="view-toggle" id="viewToggleBtn" aria-pressed="false">檢視總購買清單</button>
     </div>
   </div>
 
-  <p class="result-count" id="resultCount"></p>
+  <div id="filterArea">
+    <div class="filter-row">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search" type="text" placeholder="搜尋作品名稱或商品種類…" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="chip-line">
+      <span class="chip-label">分類</span>
+      <div class="chip-scroll">
+        <button type="button" class="chip-arrow prev" id="categoryChipPrev" aria-label="向左捲動">‹</button>
+        <div class="chip-row" id="categoryChipRow" role="group" aria-label="依商品種類篩選"></div>
+        <button type="button" class="chip-arrow next" id="categoryChipNext" aria-label="向右捲動">›</button>
+      </div>
+    </div>
+    <div class="chip-line">
+      <span class="chip-label">作品</span>
+      <div class="chip-scroll">
+        <button type="button" class="chip-arrow prev" id="seriesChipPrev" aria-label="向左捲動">‹</button>
+        <div class="chip-row" id="seriesChipRow" role="group" aria-label="依作品篩選"></div>
+        <button type="button" class="chip-arrow next" id="seriesChipNext" aria-label="向右捲動">›</button>
+      </div>
+    </div>
+
+    <p class="result-count" id="resultCount"></p>
+  </div>
 </header>
 
 <main>
   <div id="catalog"></div>
+  <div id="summaryView" hidden></div>
 </main>
 
 <footer id="ticket">
@@ -59,38 +76,30 @@
         <span class="label">總金額</span>
         <span class="value total" id="statTotal">KRW ₩0</span>
       </div>
-            <p class="ticket-gift-hint" id="giftHint" aria-live="polite"></p>
 
       <div>
       <button id="exportBtn" type="button">匯出清單</button>
       <button id="importBtn" type="button">匯入清單</button>
       <input id="importFile" type="file" accept=".csv" style="display:none">
-      <button id="createOrderBtn" type="button">建立訂單</button>
       <button id="toggleTicket" type="button" aria-expanded="false">查看清單</button>
       </div>
     </div>
 
     <div class="ticket-detail" id="ticketDetail">
-      <div class="detail-grid">
-        <div class="detail-col">
-          <h3>已選商品</h3>
-          <div id="itemList"></div>
-        </div>
-        <div class="detail-col">
-          <h3>滿額贈品</h3>
-          <div id="giftList"></div>
-        </div>
-      </div>
+      <h3 id="itemListTitle">已選商品</h3>
+      <div id="itemList"></div>
     </div>
   </div>
 </footer>
 
 <script>
 
+/* 商品/分類/作品資料與 index.html 保持一致 — 若異動商品內容，兩份檔案需一併更新。 */
+
 const CONFIG = {
-  currency: '₩',        // shown before every price/total
-  locale: 'zh-TW',        // used to format numbers, e.g. 1,234
-  decimals: 0,            // no cents needed for whole-dollar NTD prices
+  currency: '₩',
+  locale: 'zh-TW',
+  decimals: 0,
 };
 
 const SERIES_LIST = [
@@ -140,7 +149,7 @@ const NAME_LIST = [
   { category: '壓克力立牌', series: '浪漫啟示錄',      name: '蔡定鉉(受)', subname: '채정현' },
   { category: '壓克力立牌', series: '無根之樹',        name: '權熙書(攻)', subname: '권희서' },
   { category: '壓克力立牌', series: '無根之樹',        name: '車泰京(受)', subname: '차태경' },
-  
+
   { category: '甜點壓克力立牌', series: '和平之上',       name: '安和平(攻)', subname: '안평화' },
   { category: '甜點壓克力立牌', series: '和平之上',       name: '朱仁徹(受)', subname: '주인철' },
   { category: '甜點壓克力立牌', series: '神結',           name: '鄭泰伍(攻)', subname: '정태오' },
@@ -188,36 +197,39 @@ const PRODUCTS = NAME_LIST.map(n => {
 // category 的預設顯示/篩選順序：一般商品種類接著隨機商品種類。
 const CATEGORY_ORDER = [...CATEGORY_LIST, ...RANDOM_CATEGORY_LIST].map(c => c.category);
 
-// 消費滿額贈品規則：每消費滿一定金額就送 1 張贈品，最多送到上限張數。
-const GIFT_TIER_AMOUNT = 50000;
-const GIFT_NAME = 'ver.B 증정(구매금액)';
-const GIFT_MAX = 4;
 
-
-/* ===================== everything below is generic ===================== */
+/* ===================== 團購管理專用邏輯 ===================== */
 
 const state = {
-  qty: Object.fromEntries(PRODUCTS.map(p => [p.id, 0])),
+  participants: [],
+  activeParticipantId: null,
   search: '',
   seriesFilter: null,
   categoryFilter: null,
   collapsedCategories: new Set(),
+  view: 'picker', // 'picker' | 'summary'
 };
+let _nextParticipantId = 1;
 
 const fmtMoney = n => CONFIG.currency + n.toLocaleString(CONFIG.locale, { minimumFractionDigits: CONFIG.decimals ?? 2, maximumFractionDigits: CONFIG.decimals ?? 2 });
 const fmtInt = n => n.toLocaleString(CONFIG.locale);
 
 const catalogEl   = document.getElementById('catalog');
+const summaryViewEl = document.getElementById('summaryView');
+const filterAreaEl = document.getElementById('filterArea');
 const categoryChipRowEl = document.getElementById('categoryChipRow');
 const seriesChipRowEl   = document.getElementById('seriesChipRow');
+const participantChipRowEl = document.getElementById('participantChipRow');
 const searchEl    = document.getElementById('search');
 const resultCountEl = document.getElementById('resultCount');
 const statItemsEl = document.getElementById('statItems');
 const statTotalEl = document.getElementById('statTotal');
-const giftHintEl  = document.getElementById('giftHint');
 const itemListEl  = document.getElementById('itemList');
-const giftListEl  = document.getElementById('giftList');
+const itemListTitleEl = document.getElementById('itemListTitle');
 const toggleBtn   = document.getElementById('toggleTicket');
+const viewToggleBtn = document.getElementById('viewToggleBtn');
+const participantNameInput = document.getElementById('participantNameInput');
+const addParticipantBtn = document.getElementById('addParticipantBtn');
 
 function uniqueSeries(){
   return [...new Set(PRODUCTS.map(p => p.series).filter(Boolean))];
@@ -245,6 +257,7 @@ function setupChipScroller(rowEl, prevBtn, nextBtn){
 
 const updateCategoryChipArrows = setupChipScroller(categoryChipRowEl, document.getElementById('categoryChipPrev'), document.getElementById('categoryChipNext'));
 const updateSeriesChipArrows = setupChipScroller(seriesChipRowEl, document.getElementById('seriesChipPrev'), document.getElementById('seriesChipNext'));
+const updateParticipantChipArrows = setupChipScroller(participantChipRowEl, document.getElementById('participantChipPrev'), document.getElementById('participantChipNext'));
 
 function buildCategoryChips(){
   categoryChipRowEl.innerHTML = '';
@@ -294,13 +307,146 @@ function matchesFilter(p){
   return matchesCategory && matchesSeries && matchesSearch;
 }
 
-function makeCard(p){
+/* ---- 跟團者管理 ---- */
+
+function newParticipant(name){
+  return { id: _nextParticipantId++, name, qty: Object.fromEntries(PRODUCTS.map(p => [p.id, 0])) };
+}
+
+function activeParticipant(){
+  return state.participants.find(p => p.id === state.activeParticipantId) || null;
+}
+
+function addParticipant(rawName){
+  const name = (rawName || '').trim();
+  if (!name){
+    alert('請輸入跟團者名稱。');
+    return;
+  }
+  const p = newParticipant(name);
+  state.participants.push(p);
+  state.activeParticipantId = p.id;
+  renderParticipantChips();
+  renderMain();
+  updateFooter();
+}
+
+function removeParticipant(id){
+  const idx = state.participants.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  const p = state.participants[idx];
+  if (!confirm(`確定要移除跟團者「${p.name}」嗎？其已選購的品項將釋出給其他跟團者。`)) return;
+  state.participants.splice(idx, 1);
+  if (state.activeParticipantId === id){
+    state.activeParticipantId = state.participants.length ? state.participants[0].id : null;
+  }
+  renderParticipantChips();
+  renderMain();
+  updateFooter();
+}
+
+function renameParticipant(id){
+  const p = state.participants.find(x => x.id === id);
+  if (!p) return;
+  const name = prompt('修改跟團者名稱', p.name);
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed){
+    alert('名稱不可空白。');
+    return;
+  }
+  if (state.participants.some(x => x.id !== id && x.name === trimmed)){
+    if (!confirm('已有相同名稱的跟團者，仍要使用這個名稱嗎？')) return;
+  }
+  p.name = trimmed;
+  renderParticipantChips();
+  updateFooter();
+}
+
+function setActiveParticipant(id){
+  state.activeParticipantId = id;
+  renderParticipantChips();
+  renderMain();
+  updateFooter();
+}
+
+function renderParticipantChips(){
+  participantChipRowEl.innerHTML = '';
+  state.participants.forEach(p => {
+    const cart = computeParticipantCart(p);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip participant-chip';
+    btn.setAttribute('aria-pressed', state.activeParticipantId === p.id ? 'true' : 'false');
+    btn.innerHTML = `<span class="p-name">${p.name}</span><span class="p-stat">${fmtInt(cart.totalItems)}件・${fmtMoney(cart.totalAmount)}</span><span class="p-remove" title="移除跟團者">×</span>`;
+    btn.addEventListener('click', (e) => {
+      if (e.target.closest('.p-remove')){
+        e.stopPropagation();
+        removeParticipant(p.id);
+        return;
+      }
+      if (state.activeParticipantId === p.id){
+        renameParticipant(p.id);
+      } else {
+        setActiveParticipant(p.id);
+      }
+    });
+    participantChipRowEl.appendChild(btn);
+  });
+  updateParticipantChipArrows();
+}
+
+/* ---- 共用庫存/金額計算 ---- */
+
+function aggregatedQty(productId){
+  return state.participants.reduce((sum, p) => sum + (p.qty[productId] || 0), 0);
+}
+
+function computeParticipantCart(participant){
+  const lines = PRODUCTS
+    .map(p => ({ ...p, qty: participant.qty[p.id] || 0 }))
+    .filter(l => l.qty > 0);
+
+  const totalItems = lines.reduce((sum, l) => sum + l.qty, 0);
+  const totalAmount = lines.reduce((sum, l) => sum + l.qty * l.price, 0);
+
+  return { lines, totalItems, totalAmount };
+}
+
+function computeAggregatedCart(){
+  const lines = PRODUCTS
+    .map(p => {
+      const qty = aggregatedQty(p.id);
+      return { ...p, qty, over: qty > p.limited };
+    })
+    .filter(l => l.qty > 0);
+
+  const totalItems = lines.reduce((sum, l) => sum + l.qty, 0);
+  const totalAmount = lines.reduce((sum, l) => sum + l.qty * l.price, 0);
+
+  return { lines, totalItems, totalAmount };
+}
+
+function grandTotals(){
+  const { totalItems, totalAmount } = computeAggregatedCart();
+  return { totalItems, totalAmount };
+}
+
+/* ---- 商品卡片（依目前選取的跟團者，並套用全團共用限量） ---- */
+
+function makeParticipantCard(p, participant){
   const card = document.createElement('article');
   card.className = 'card';
   card.dataset.id = p.id;
 
+  function maxForActive(){
+    const othersQty = aggregatedQty(p.id) - (participant.qty[p.id] || 0);
+    return Math.max(0, p.limited - othersQty);
+  }
+
+  const initialCap = maxForActive();
   card.innerHTML = `
-    <span class="sku">限量 ${p.limited}${p.note ? ' · ' + p.note : ''}</span>
+    <span class="sku">限量 ${p.limited}・剩 ${initialCap}${p.note ? ' · ' + p.note : ''}</span>
     <div class="info">
       <p class="series">${p.series || '隨機商品'}</p>
       <h2 class="name">${p.name}</h2>
@@ -308,37 +454,70 @@ function makeCard(p){
     </div>
     <div class="stepper">
       <button type="button" class="dec" aria-label="減少「${p.name}」數量">−</button>
-      <input class="qty-input" type="number" min="0" max="${p.limited}" step="1" inputmode="numeric"
-             value="${state.qty[p.id]}" aria-label="「${p.name}」數量">
+      <input class="qty-input" type="number" min="0" max="${initialCap}" step="1" inputmode="numeric"
+             value="${participant.qty[p.id] || 0}" aria-label="「${p.name}」數量">
       <button type="button" class="inc" aria-label="增加「${p.name}」數量">+</button>
     </div>
   `;
 
+  const skuEl = card.querySelector('.sku');
   const input = card.querySelector('.qty-input');
   const dec = card.querySelector('.dec');
   const inc = card.querySelector('.inc');
 
-  function setQty(n){
-    n = Math.max(0, Math.min(p.limited, Math.floor(Number.isFinite(n) ? n : 0)));
-    state.qty[p.id] = n;
-    input.value = n;
-    card.classList.toggle('has-qty', n > 0);
-    inc.disabled = n >= p.limited;
+  function refreshCapDisplay(cap){
+    input.max = cap;
+    const n = participant.qty[p.id] || 0;
+    skuEl.textContent = `限量 ${p.limited}・剩 ${cap}${p.note ? ' · ' + p.note : ''}`;
+    skuEl.classList.toggle('sold-out', cap === 0 && n === 0);
+    inc.disabled = n >= cap;
     dec.disabled = n <= 0;
-    updateTicket();
   }
 
-  dec.addEventListener('click', () => setQty(state.qty[p.id] - 1));
-  inc.addEventListener('click', () => setQty(state.qty[p.id] + 1));
+  function setQty(n){
+    const cap = maxForActive();
+    n = Math.max(0, Math.min(cap, Math.floor(Number.isFinite(n) ? n : 0)));
+    participant.qty[p.id] = n;
+    input.value = n;
+    card.classList.toggle('has-qty', n > 0);
+    refreshCapDisplay(cap);
+    renderParticipantChips();
+    updateFooter();
+  }
+
+  dec.addEventListener('click', () => setQty((participant.qty[p.id] || 0) - 1));
+  inc.addEventListener('click', () => setQty((participant.qty[p.id] || 0) + 1));
   input.addEventListener('input', () => setQty(parseInt(input.value, 10)));
   input.addEventListener('blur', () => setQty(parseInt(input.value, 10) || 0));
 
-  setQty(state.qty[p.id]);
+  refreshCapDisplay(initialCap);
   return card;
+}
+
+/* ---- 主要內容渲染（挑選商品 / 總覽） ---- */
+
+function renderMain(){
+  const isSummary = state.view === 'summary';
+  filterAreaEl.hidden = isSummary;
+  catalogEl.hidden = isSummary;
+  summaryViewEl.hidden = !isSummary;
+  if (isSummary) renderSummaryView();
+  else renderCatalog();
 }
 
 function renderCatalog(){
   catalogEl.innerHTML = '';
+  const participant = activeParticipant();
+
+  if (!participant){
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.textContent = '請先新增跟團者，再開始選擇商品。';
+    catalogEl.appendChild(empty);
+    resultCountEl.textContent = '';
+    return;
+  }
+
   const visible = PRODUCTS.filter(matchesFilter);
 
   if (visible.length === 0){
@@ -382,7 +561,7 @@ function renderCatalog(){
         const body = document.createElement('div');
         body.className = 'category-body';
         if (collapsed) body.hidden = true;
-        products.forEach(p => body.appendChild(makeCard(p)));
+        products.forEach(p => body.appendChild(makeParticipantCard(p, participant)));
 
         block.appendChild(header);
         block.appendChild(body);
@@ -393,90 +572,119 @@ function renderCatalog(){
   resultCountEl.textContent = `顯示 ${visible.length} / ${PRODUCTS.length} 項商品`;
 }
 
-function computeCart(){
-  const lines = PRODUCTS
-    .map(p => ({ ...p, qty: state.qty[p.id] }))
-    .filter(l => l.qty > 0);
-
-  const totalItems = lines.reduce((sum, l) => sum + l.qty, 0);
-  const totalAmount = lines.reduce((sum, l) => sum + l.qty * l.price, 0);
-
-  return { lines, totalItems, totalAmount };
+function itemRowHtml(l, showLimitTag){
+  const line1 = (l.series === l.name ? [l.category, l.series] : [l.category, l.series, l.name]).filter(Boolean).join('．');
+  const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries] : [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
+  const qtyTag = showLimitTag ? `×${l.qty} / 限${l.limited}` : `×${l.qty}`;
+  return `
+    <div class="item-row${l.over ? ' aggregate-row' : ''}">
+      <div class="item-lines">
+        <div class="item-line1">${line1} <span class="n">${qtyTag}</span>${l.over ? '<span class="over-limit">超過限量</span>' : ''}</div>
+        ${line2 ? `<div class="item-line2">${line2}</div>` : ''}
+      </div>
+      <span class="item-amount">${fmtMoney(l.qty * l.price)}</span>
+    </div>`;
 }
 
-function updateTicket(){
-  const { lines, totalItems, totalAmount } = computeCart();
+function renderSummaryView(){
+  summaryViewEl.innerHTML = '';
 
-  statItemsEl.textContent = fmtInt(totalItems);
-  statTotalEl.textContent = fmtMoney(totalAmount);
+  const wrap = document.createElement('div');
+  wrap.className = 'summary-panels';
 
-  // Items breakdown
-  itemListEl.innerHTML = '';
-  if (lines.length === 0){
-    itemListEl.innerHTML = '<p class="no-items">尚未選擇任何商品。</p>';
+  const colA = document.createElement('div');
+  colA.innerHTML = '<h3>跟團者明細</h3>';
+  if (state.participants.length === 0){
+    colA.innerHTML += '<p class="no-items">尚未新增任何跟團者。</p>';
   } else {
-    lines.forEach(l => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      const line1 =(l.series === l.name ? [l.category, l.series]: [l.category, l.series, l.name]).filter(Boolean).join('．');
-      const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries]: [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
-      row.innerHTML = `
-        <div class="item-lines">
-          <div class="item-line1">${line1} <span class="n">×${l.qty}</span></div>
-          ${line2 ? `<div class="item-line2">${line2}</div>` : ''}
+    state.participants.forEach(participant => {
+      const cart = computeParticipantCart(participant);
+      const card = document.createElement('div');
+      card.className = 'participant-summary-card';
+      const linesHtml = cart.lines.length
+        ? cart.lines.map(l => itemRowHtml(l, false)).join('')
+        : '<p class="no-items">尚未選擇商品。</p>';
+      card.innerHTML = `
+        <div class="p-head">
+          <span class="p-name">${participant.name}</span>
+          <span class="p-total">${fmtInt(cart.totalItems)} 件・${fmtMoney(cart.totalAmount)}</span>
         </div>
-        <span class="item-amount">${fmtMoney(l.qty * l.price)}</span>
+        ${linesHtml}
       `;
-      itemListEl.appendChild(row);
+      colA.appendChild(card);
     });
   }
 
-  // Gift progress — 1 gift per GIFT_TIER_AMOUNT spent, capped at GIFT_MAX
-  const giftCount = Math.min(GIFT_MAX, Math.floor(totalAmount / GIFT_TIER_AMOUNT));
-  const maxedOut = giftCount >= GIFT_MAX;
+  const colB = document.createElement('div');
+  colB.innerHTML = '<h3>全團彙總（依商品）</h3>';
+  const agg = computeAggregatedCart();
+  colB.innerHTML += agg.lines.length
+    ? agg.lines.map(l => itemRowHtml(l, true)).join('')
+    : '<p class="no-items">尚未選擇任何商品。</p>';
 
-  giftListEl.innerHTML = '';
-  const row = document.createElement('div');
-  row.className = 'gift-row' + (giftCount > 0 ? ' unlocked' : '');
-  row.innerHTML = `
-    <span class="gift-check">${giftCount > 0 ? '✓' : ''}</span>
-    <span class="g-name">${GIFT_NAME}</span>
-    <span class="g-req">已獲得 ${giftCount} / ${GIFT_MAX} 張</span>
-  `;
-  giftListEl.appendChild(row);
+  wrap.appendChild(colA);
+  wrap.appendChild(colB);
+  summaryViewEl.appendChild(wrap);
+}
 
-  // Hint line in the collapsed summary
-  if (maxedOut){
-    giftHintEl.innerHTML = `<b>已獲得全部 ${GIFT_MAX} 張 ${GIFT_NAME}</b> 🎉`;
+/* ---- 頁尾統計（依目前檢視模式顯示對象不同） ---- */
+
+function updateFooter(){
+  if (state.view === 'summary'){
+    const { totalItems, totalAmount } = grandTotals();
+    statItemsEl.textContent = fmtInt(totalItems);
+    statTotalEl.textContent = fmtMoney(totalAmount);
+    itemListTitleEl.textContent = '全團彙總商品';
+    renderItemList(computeAggregatedCart().lines, true);
   } else {
-    const remaining = (giftCount + 1) * GIFT_TIER_AMOUNT - totalAmount;
-    giftHintEl.innerHTML = `已獲得 <b>${giftCount} / ${GIFT_MAX}</b> 張 ${GIFT_NAME}，再加購 <b>${fmtMoney(remaining)}</b> 即可再得一張`;
+    const participant = activeParticipant();
+    const cart = participant ? computeParticipantCart(participant) : { lines: [], totalItems: 0, totalAmount: 0 };
+    statItemsEl.textContent = fmtInt(cart.totalItems);
+    statTotalEl.textContent = fmtMoney(cart.totalAmount);
+    itemListTitleEl.textContent = participant ? `${participant.name}．已選商品` : '已選商品';
+    renderItemList(cart.lines, false);
   }
 }
+
+function renderItemList(lines, showLimitTag){
+  itemListEl.innerHTML = lines.length
+    ? lines.map(l => itemRowHtml(l, showLimitTag)).join('')
+    : '<p class="no-items">尚未選擇任何商品。</p>';
+}
+
+/* ---- CSV 匯出 / 匯入 ---- */
 
 function csvEscape(v){
   const s = String(v ?? '');
   return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
-function exportCart(){
-  const { lines, totalItems, totalAmount } = computeCart();
-  if (lines.length === 0){
-    alert('尚未選擇任何商品，無法匯出。');
+function exportGroupCsv(){
+  if (state.participants.length === 0){
+    alert('尚未新增任何跟團者，無法匯出。');
     return;
   }
 
   const rows = [
-    ['分類', '作品', '名稱', '原文分類', '原文作品', '原文名稱', '單價', '數量', '小計'],
-    ...lines.map(l => [
-      l.category, l.series || '', l.name,
-      l.subcategory || '', l.subseries || '', l.subname || '',
-      l.price, l.qty, l.qty * l.price,
-    ]),
-    [],
-    ['總件數', totalItems],
-    ['總金額', totalAmount],
+    ['跟團者', '分類', '作品', '名稱', '原文分類', '原文作品', '原文名稱', '單價', '數量', '小計'],
   ];
+  state.participants.forEach(participant => {
+    computeParticipantCart(participant).lines.forEach(l => {
+      rows.push([
+        participant.name,
+        l.category, l.series || '', l.name,
+        l.subcategory || '', l.subseries || '', l.subname || '',
+        l.price, l.qty, l.qty * l.price,
+      ]);
+    });
+  });
+
+  const { totalItems, totalAmount } = grandTotals();
+  rows.push([]);
+  rows.push(['跟團者名單', ...state.participants.map(p => p.name)]);
+  rows.push([]);
+  rows.push(['總件數', totalItems]);
+  rows.push(['總金額', totalAmount]);
 
   const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -484,7 +692,7 @@ function exportCart(){
   const a = document.createElement('a');
   const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
   a.href = url;
-  a.download = `購買清單_${ts}.csv`;
+  a.download = `團購清單_${ts}.csv`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -492,92 +700,7 @@ function exportCart(){
 }
 
 const exportBtn = document.getElementById('exportBtn');
-exportBtn.addEventListener('click', exportCart);
-
-function orderPageHtml(){
-  const { lines, totalItems, totalAmount } = computeCart();
-  const giftCount = Math.min(GIFT_MAX, Math.floor(totalAmount / GIFT_TIER_AMOUNT));
-
-  const itemRows = lines.map(l => {
-    const line1 = (l.series === l.name ? [l.category, l.series] : [l.category, l.series, l.name]).filter(Boolean).join('．');
-    const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries] : [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
-    return `
-      <div class="item-row">
-        <div class="item-lines">
-          <div class="item-line1">${line1} <span class="n">×${l.qty}</span></div>
-          ${line2 ? `<div class="item-line2">${line2}</div>` : ''}
-        </div>
-        <span class="item-amount">${fmtMoney(l.qty * l.price)}</span>
-      </div>`;
-  }).join('');
-
-  return `<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>訂單明細 - Salon de Lebom</title>
-<style>
-  :root{ --ink:#1B0F1F; --panel:#2B1A31; --line:#56395A; --paper:#F7ECF2; --paper-dim:#C9A3C2; --forest:#D43F8D; --mustard:#FF4FA0; }
-  *{ box-sizing:border-box; }
-  body{ margin:0; padding:24px 20px 60px; background:var(--ink); color:var(--paper); font-family:'Libre Franklin', system-ui, sans-serif; }
-  .container{ max-width:900px; width:100%; margin:0 auto; }
-  h1{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:clamp(18px, 4vw, 22px); margin:0 0 4px; }
-  .sub{ color:var(--paper-dim); font-size:13px; margin:0 0 24px; }
-  .stats{ display:flex; flex-wrap:wrap; gap:24px; margin-bottom:24px; }
-  .stat .label{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-dim); }
-  .stat .value{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:24px; font-weight:600; }
-  .stat .value.total{ color:var(--mustard); }
-  h3{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-dim); margin:28px 0 10px; }
-  .item-row{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--line); gap:10px; }
-  .item-row .n{ color:var(--paper-dim); font-family:'IBM Plex Mono', ui-monospace, monospace; }
-  .item-lines{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 200px; }
-  .item-line1{ color:var(--paper); overflow-wrap:anywhere; }
-  .item-line2{ font-size:11.5px; color:var(--paper-dim); overflow-wrap:anywhere; }
-  .item-amount{ flex:0 0 auto; white-space:nowrap; }
-  .gift-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
-  .gift-check{ width:16px; height:16px; border-radius:50%; border:1px solid var(--paper-dim); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
-  .gift-row.unlocked .gift-check{ background:var(--forest); border-color:var(--forest); color:var(--paper); }
-  .gift-row .g-name{ font-size:13.5px; }
-  .gift-row.unlocked .g-name{ color:var(--paper); }
-  .gift-row:not(.unlocked) .g-name{ color:var(--paper-dim); }
-  .gift-row .g-req{ margin-left:auto; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; color:var(--paper-dim); }
-</style>
-</head>
-<body>
-  <div class="container">
-    <h1>訂單明細</h1>
-    <p class="sub">${new Date().toLocaleString('zh-TW')}</p>
-    <div class="stats">
-      <div class="stat"><div class="label">件數</div><div class="value">${fmtInt(totalItems)}</div></div>
-      <div class="stat"><div class="label">總金額</div><div class="value total">${fmtMoney(totalAmount)}</div></div>
-    </div>
-    <h3>已選商品</h3>
-    ${itemRows || '<p class="no-items">尚未選擇任何商品。</p>'}
-    <h3>滿額贈品</h3>
-    <div class="gift-row${giftCount > 0 ? ' unlocked' : ''}">
-      <span class="gift-check">${giftCount > 0 ? '✓' : ''}</span>
-      <span class="g-name">${GIFT_NAME}</span>
-      <span class="g-req">已獲得 ${giftCount} / ${GIFT_MAX} 張</span>
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-function openOrderPage(){
-  const { lines } = computeCart();
-  if (lines.length === 0){
-    alert('尚未選擇任何商品，無法建立訂單。');
-    return;
-  }
-  const blob = new Blob([orderPageHtml()], { type: 'text/html;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-}
-
-const createOrderBtn = document.getElementById('createOrderBtn');
-createOrderBtn.addEventListener('click', openOrderPage);
+exportBtn.addEventListener('click', exportGroupCsv);
 
 function parseCsvLine(line){
   const cells = [];
@@ -605,44 +728,79 @@ function parseCsvLine(line){
   return cells;
 }
 
-function importCart(file){
+function importGroupCsv(file){
   const reader = new FileReader();
   reader.onload = () => {
     const text = String(reader.result).replace(/^﻿/, '');
     const rawLines = text.split(/\r\n|\n/);
     const lines = rawLines.slice(1); // skip header row
 
-    const qtyById = Object.fromEntries(PRODUCTS.map(p => [p.id, 0]));
+    const participantsByName = new Map();
+    const orderedNames = [];
     let importedCount = 0;
     let notFoundCount = 0;
 
-    for (const line of lines){
-      if (!line.trim()) break;
+    function getOrCreate(name){
+      if (!participantsByName.has(name)){
+        participantsByName.set(name, newParticipant(name));
+        orderedNames.push(name);
+      }
+      return participantsByName.get(name);
+    }
+
+    let i = 0;
+    for (; i < lines.length; i++){
+      const line = lines[i];
+      if (!line.trim()) break; // 到達空白分隔列
       const cells = parseCsvLine(line);
-      const [category, series, name, , , , , qtyStr] = cells;
-      if (category === '總件數' || category === '總金額') break;
+      const [participantName, category, series, name, , , , , qtyStr] = cells;
+      if (participantName === '總件數' || participantName === '總金額') break;
 
       const qty = parseInt(qtyStr, 10);
       if (!qty) continue;
 
+      const participant = getOrCreate(participantName || '(未命名)');
       const product = PRODUCTS.find(p =>
         p.category === category && (p.series || '') === series && p.name === name
       );
       if (product){
-        qtyById[product.id] = Math.min(qty, product.limited);
+        participant.qty[product.id] = Math.min(qty, product.limited);
         importedCount++;
       } else {
         notFoundCount++;
       }
     }
 
-    state.qty = qtyById;
-    renderCatalog();
-    updateTicket();
+    // 讀取空白分隔列之後的「跟團者名單」列，確保沒有任何品項的跟團者也能被還原。
+    for (; i < lines.length; i++){
+      const line = lines[i];
+      if (!line.trim()) continue;
+      const cells = parseCsvLine(line);
+      if (cells[0] === '跟團者名單'){
+        cells.slice(1).forEach(name => { if (name) getOrCreate(name); });
+      }
+      if (cells[0] === '總件數' || cells[0] === '總金額') break;
+    }
 
-    alert(notFoundCount > 0
-      ? `已匯入 ${importedCount} 筆，其中 ${notFoundCount} 筆找不到對應商品。`
-      : `已匯入 ${importedCount} 筆。`);
+    const participants = orderedNames.map(name => participantsByName.get(name));
+
+    // 偵測匯入資料是否違反全團共用限量（例如手動編輯過 CSV），絕不自動重新分配數量。
+    let overLimitCount = 0;
+    PRODUCTS.forEach(p => {
+      const total = participants.reduce((sum, part) => sum + (part.qty[p.id] || 0), 0);
+      if (total > p.limited) overLimitCount++;
+    });
+
+    state.participants = participants;
+    state.activeParticipantId = participants.length ? participants[0].id : null;
+    renderParticipantChips();
+    renderMain();
+    updateFooter();
+
+    const parts = [`已匯入 ${importedCount} 筆`];
+    if (notFoundCount > 0) parts.push(`${notFoundCount} 筆找不到對應商品`);
+    if (overLimitCount > 0) parts.push(`${overLimitCount} 項商品超過限量上限，已標記但未自動修改，請至「檢視總購買清單」確認`);
+    alert(parts.join('，') + '。');
   };
   reader.readAsText(file, 'utf-8');
 }
@@ -652,8 +810,30 @@ const importFileEl = document.getElementById('importFile');
 importBtn.addEventListener('click', () => importFileEl.click());
 importFileEl.addEventListener('change', () => {
   const file = importFileEl.files[0];
-  if (file) importCart(file);
+  if (file) importGroupCsv(file);
   importFileEl.value = '';
+});
+
+/* ---- 其他事件綁定 ---- */
+
+addParticipantBtn.addEventListener('click', () => {
+  addParticipant(participantNameInput.value);
+  participantNameInput.value = '';
+  participantNameInput.focus();
+});
+participantNameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter'){
+    e.preventDefault();
+    addParticipantBtn.click();
+  }
+});
+
+viewToggleBtn.addEventListener('click', () => {
+  state.view = state.view === 'picker' ? 'summary' : 'picker';
+  viewToggleBtn.setAttribute('aria-pressed', state.view === 'summary' ? 'true' : 'false');
+  viewToggleBtn.textContent = state.view === 'summary' ? '返回選購' : '檢視總購買清單';
+  renderMain();
+  updateFooter();
 });
 
 searchEl.addEventListener('input', () => {
@@ -670,8 +850,9 @@ toggleBtn.addEventListener('click', () => {
 
 buildCategoryChips();
 buildSeriesChips();
-renderCatalog();
-updateTicket();
+renderParticipantChips();
+renderMain();
+updateFooter();
 </script>
 </body>
 </html>
