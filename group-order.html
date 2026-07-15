@@ -114,21 +114,21 @@ const SERIES_LIST = [
 ];
 
 const CATEGORY_LIST = [
-  { category: '壓克力立牌',         subcategory: '아크릴 스탠드', price: 15000, limited: 3, note: '' },
-  { category: '甜點壓克力立牌',      subcategory: '스위츠 아크릴 스탠드', price: 15000, limited: 3, note: '每份含壓克力立牌1塊，小卡1張' },
-  { category: '女僕執事壓克力套組',  subcategory: '메이드와 집사 아크릴 블록', price: 30000, limited: 3, note: '每份含壓克力磚1塊，拍立得透卡2張' },
-  { category: 'SD飯友套組',          subcategory: 'SD 커플 아크릴 블록', price: 15000, limited: 3, note: '每份含壓克力飯友1塊，小卡1張' },
-  { category: '名牌吊飾組',          subcategory: '네임 플레이트 패키지', price: 13500, limited: 3, note: '每份含名牌壓克力板1塊，餅乾吊飾1份' },
-  { category: 'Lebom限定相卡',       subcategory: '레봄 필름 인화 사진', price: 2000,  limited: 5, note: '' },
-  { category: 'Lebom限定貼紙',       subcategory: '레봄 조각 스티커', price: 2000,  limited: 5, note: '' },
+  { category: '壓克力立牌',         subcategory: '아크릴 스탠드', price: 15000, limited: 3 },
+  { category: '甜點壓克力立牌',      subcategory: '스위츠 아크릴 스탠드', price: 15000, limited: 3 },
+  { category: '女僕執事壓克力套組',  subcategory: '메이드와 집사 아크릴 블록', price: 30000, limited: 3 },
+  { category: 'SD飯友套組',          subcategory: 'SD 커플 아크릴 블록', price: 15000, limited: 3 },
+  { category: '名牌吊飾組',          subcategory: '네임 플레이트 패키지', price: 13500, limited: 3 },
+  { category: 'Lebom限定相卡',       subcategory: '레봄 필름 인화 사진', price: 2000,  limited: 5 },
+  { category: 'Lebom限定貼紙',       subcategory: '레봄 조각 스티커', price: 2000,  limited: 5 },
 ];
 
 const RANDOM_CATEGORY_LIST = [
-  { category: '隨機拍立得',             subcategory: '데코 포토팩', price: 5000,  limited: 10, note: '每份8種中隨機1種，每份含寫真1張，小卡1張' },
-  { category: '隨機壓克力磁鐵',         subcategory: '스위츠 아크릴 마그넷', price: 7000,  limited: 10, note: '每份8種中隨機1種' },
-  { category: '隨機愛心徽章',           subcategory: '하트 캔뱃지', price: 5000,  limited: 10, note: '每份8種中隨機1種' },
-  { category: '隨機愛心徽章壓克力框架', subcategory: '아크릴 캔뱃지 프레임', price: 17000, limited: 3,  note: '' },
-  { category: '隨機卡包',               subcategory: '컬렉션 포토카드', price: 5000,  limited: 10, note: '每份16種中隨機3種' },
+  { category: '隨機拍立得',             subcategory: '데코 포토팩', price: 5000,  limited: 10 },
+  { category: '隨機壓克力磁鐵',         subcategory: '스위츠 아크릴 마그넷', price: 7000,  limited: 10 },
+  { category: '隨機愛心徽章',           subcategory: '하트 캔뱃지', price: 5000,  limited: 10 },
+  { category: '隨機愛心徽章壓克力框架', subcategory: '아크릴 캔뱃지 프레임', price: 17000, limited: 3 },
+  { category: '隨機卡包',               subcategory: '컬렉션 포토카드', price: 5000,  limited: 10 },
 ];
 
 const NAME_LIST = [
@@ -188,7 +188,6 @@ const PRODUCTS = NAME_LIST.map(n => {
     subname: n.subname,
     category: n.category,
     subcategory: cat.subcategory,
-    note: cat.note,
     price: cat.price,
     limited: cat.limited,
   };
@@ -446,7 +445,7 @@ function makeParticipantCard(p, participant){
 
   const initialCap = maxForActive();
   card.innerHTML = `
-    <span class="sku">限量 ${p.limited}・剩 ${initialCap}${p.note ? ' · ' + p.note : ''}</span>
+    <span class="sku">限量 ${p.limited}・剩 ${initialCap}</span>
     <div class="info">
       <p class="series">${p.series || '隨機商品'}</p>
       <h2 class="name">${p.name}</h2>
@@ -468,7 +467,7 @@ function makeParticipantCard(p, participant){
   function refreshCapDisplay(cap){
     input.max = cap;
     const n = participant.qty[p.id] || 0;
-    skuEl.textContent = `限量 ${p.limited}・剩 ${cap}${p.note ? ' · ' + p.note : ''}`;
+    skuEl.textContent = `限量 ${p.limited}・剩 ${cap}`;
     skuEl.classList.toggle('sold-out', cap === 0 && n === 0);
     inc.disabled = n >= cap;
     dec.disabled = n <= 0;
@@ -616,7 +615,7 @@ function renderSummaryView(){
   }
 
   const colB = document.createElement('div');
-  colB.innerHTML = '<h3>全團彙總（依商品）</h3>';
+  colB.innerHTML = '<h3>全團彙總</h3>';
   const agg = computeAggregatedCart();
   colB.innerHTML += agg.lines.length
     ? agg.lines.map(l => itemRowHtml(l, true)).join('')
