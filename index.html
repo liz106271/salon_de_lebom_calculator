@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="products-data.js"></script>
 </head>
 <body>
 
@@ -87,105 +88,7 @@
 
 <script>
 
-const CONFIG = {
-  currency: '₩',        // shown before every price/total
-  locale: 'zh-TW',        // used to format numbers, e.g. 1,234
-  decimals: 0,            // no cents needed for whole-dollar NTD prices
-};
-
-const SERIES_LIST = [
-  { series: '和平之上',       subseries: '주의 평화' },
-  { series: '今晚溫柔點',      subseries: '밤은 부드러워라' },
-  { series: '神結',           subseries: '신결' },
-  { series: 'Full Book',      subseries: '풀북' },
-  { series: '星期一的救贖',    subseries: '월요일의 구원자' },
-  { series: '親屬肝係證明書',  subseries: '가족간계증명서' },
-  { series: '浪漫啟示錄',      subseries: '낭만 묵시록' },
-  { series: '無根之樹',        subseries: '뿌리 없는 나무' },
-];
-
-const CATEGORY_LIST = [
-  { category: '壓克力立牌',         subcategory: '아크릴 스탠드', price: 15000, limited: 3 },
-  { category: '甜點壓克力立牌',      subcategory: '스위츠 아크릴 스탠드', price: 15000, limited: 3 },
-  { category: '女僕執事壓克力套組',  subcategory: '메이드와 집사 아크릴 블록', price: 30000, limited: 3 },
-  { category: 'SD飯友套組',          subcategory: 'SD 커플 아크릴 블록', price: 15000, limited: 3 },
-  { category: '名牌吊飾組',          subcategory: '네임 플레이트 패키지', price: 13500, limited: 3 },
-  { category: 'Lebom限定相卡',       subcategory: '레봄 필름 인화 사진', price: 2000,  limited: 5 },
-  { category: 'Lebom限定貼紙',       subcategory: '레봄 조각 스티커', price: 2000,  limited: 5 },
-];
-
-const RANDOM_CATEGORY_LIST = [
-  { category: '隨機拍立得',             subcategory: '데코 포토팩', price: 5000,  limited: 10 },
-  { category: '隨機壓克力磁鐵',         subcategory: '스위츠 아크릴 마그넷', price: 7000,  limited: 10 },
-  { category: '隨機愛心徽章',           subcategory: '하트 캔뱃지', price: 5000,  limited: 10 },
-  { category: '隨機愛心徽章壓克力框架', subcategory: '아크릴 캔뱃지 프레임', price: 17000, limited: 3 },
-  { category: '隨機卡包',               subcategory: '컬렉션 포토카드', price: 5000,  limited: 10 },
-];
-
-const NAME_LIST = [
-  // 壓克力立牌 — 每個作品 2 個角色
-  { category: '壓克力立牌', series: '和平之上',       name: '安和平(攻)', subname: '안평화' },
-  { category: '壓克力立牌', series: '和平之上',       name: '朱仁徹(受)', subname: '주인철' },
-  { category: '壓克力立牌', series: '神結',           name: '鄭泰伍(攻)', subname: '정태오' },
-  { category: '壓克力立牌', series: '神結',           name: '趙之遠(受)', subname: '조지원' },
-  { category: '壓克力立牌', series: '今晚溫柔點',      name: '高希宰(攻)', subname: '고희재' },
-  { category: '壓克力立牌', series: '今晚溫柔點',      name: '鮮于真(受)', subname: '선우진' },
-  { category: '壓克力立牌', series: 'Full Book',      name: '閔皓淵(攻)', subname: '민호연' },
-  { category: '壓克力立牌', series: 'Full Book',      name: '崔在昇(受)', subname: '최재승' },
-  { category: '壓克力立牌', series: '星期一的救贖',    name: '具允元(攻)', subname: '구윤원' },
-  { category: '壓克力立牌', series: '星期一的救贖',    name: '元燿日(受)', subname: '원요일' },
-  { category: '壓克力立牌', series: '親屬肝係證明書',  name: '九緣書(攻)', subname: '구연서' },
-  { category: '壓克力立牌', series: '親屬肝係證明書',  name: '柳珉赫(受)', subname: '유민혁' },
-  { category: '壓克力立牌', series: '浪漫啟示錄',      name: '廉泰華(攻)', subname: '염태화' },
-  { category: '壓克力立牌', series: '浪漫啟示錄',      name: '蔡定鉉(受)', subname: '채정현' },
-  { category: '壓克力立牌', series: '無根之樹',        name: '權熙書(攻)', subname: '권희서' },
-  { category: '壓克力立牌', series: '無根之樹',        name: '車泰京(受)', subname: '차태경' },
-  
-  { category: '甜點壓克力立牌', series: '和平之上',       name: '安和平(攻)', subname: '안평화' },
-  { category: '甜點壓克力立牌', series: '和平之上',       name: '朱仁徹(受)', subname: '주인철' },
-  { category: '甜點壓克力立牌', series: '神結',           name: '鄭泰伍(攻)', subname: '정태오' },
-  { category: '甜點壓克力立牌', series: '神結',           name: '趙之遠(受)', subname: '조지원' },
-  { category: '甜點壓克力立牌', series: '今晚溫柔點',      name: '高希宰(攻)', subname: '고희재' },
-  { category: '甜點壓克力立牌', series: '今晚溫柔點',      name: '鮮于真(受)', subname: '선우진' },
-  { category: '甜點壓克力立牌', series: 'Full Book',      name: '閔皓淵(攻)', subname: '민호연' },
-  { category: '甜點壓克力立牌', series: 'Full Book',      name: '崔在昇(受)', subname: '최재승' },
-  { category: '甜點壓克力立牌', series: '星期一的救贖',    name: '具允元(攻)', subname: '구윤원' },
-  { category: '甜點壓克力立牌', series: '星期一的救贖',    name: '元燿日(受)', subname: '원요일' },
-  { category: '甜點壓克力立牌', series: '親屬肝係證明書',  name: '九緣書(攻)', subname: '구연서' },
-  { category: '甜點壓克力立牌', series: '親屬肝係證明書',  name: '柳珉赫(受)', subname: '유민혁' },
-  { category: '甜點壓克力立牌', series: '浪漫啟示錄',      name: '廉泰華(攻)', subname: '염태화' },
-  { category: '甜點壓克力立牌', series: '浪漫啟示錄',      name: '蔡定鉉(受)', subname: '채정현' },
-  { category: '甜點壓克力立牌', series: '無根之樹',        name: '權熙書(攻)', subname: '권희서' },
-  { category: '甜點壓克力立牌', series: '無根之樹',        name: '車泰京(受)', subname: '차태경' },
-
-  ...['Lebom限定相卡', '女僕執事壓克力套組', 'SD飯友套組', '名牌吊飾組', 'Lebom限定貼紙'].flatMap(category =>
-    SERIES_LIST.map(({ series, subseries }) => ({ category, series, name: series, subname: subseries }))
-  ),
-
-  // 隨機商品（沒有 series）
-  ...RANDOM_CATEGORY_LIST.map(({ category }) => ({ category, series: null, name: category, subname: '' })),
-];
-
-let _nextId = 1;
-const PRODUCTS = NAME_LIST.map(n => {
-  const cat = [...CATEGORY_LIST, ...RANDOM_CATEGORY_LIST].find(c => c.category === n.category);
-  const ser = n.series ? SERIES_LIST.find(s => s.series === n.series) : null;
-  const id = _nextId++;
-  return {
-    id,
-    series: n.series,
-    subseries: ser ? ser.subseries : null,
-    name: n.name,
-    subname: n.subname,
-    category: n.category,
-    subcategory: cat.subcategory,
-    price: cat.price,
-    limited: cat.limited,
-  };
-});
-
-// category 的預設顯示/篩選順序：一般商品種類接著隨機商品種類。
-const CATEGORY_ORDER = [...CATEGORY_LIST, ...RANDOM_CATEGORY_LIST].map(c => c.category);
+/* 商品/分類/作品資料定義於 products-data.js（group-order.html 共用同一份） */
 
 // 消費滿額贈品規則：每消費滿一定金額就送 1 張贈品，最多送到上限張數。
 const GIFT_TIER_AMOUNT = 50000;
@@ -196,7 +99,7 @@ const GIFT_MAX = 4;
 /* ===================== everything below is generic ===================== */
 
 const state = {
-  qty: Object.fromEntries(PRODUCTS.map(p => [p.id, 0])),
+  qty: Object.fromEntries(PRODUCTS.map(p => [p.code, 0])),
   search: '',
   seriesFilter: null,
   categoryFilter: null,
@@ -296,10 +199,10 @@ function matchesFilter(p){
 function makeCard(p){
   const card = document.createElement('article');
   card.className = 'card';
-  card.dataset.id = p.id;
+  card.dataset.code = p.code;
 
   card.innerHTML = `
-    <span class="sku">限量 ${p.limited}</span>
+    <span class="sku">${p.code}・限量 ${p.limited}</span>
     <div class="info">
       <p class="series">${p.series || '隨機商品'}</p>
       <h2 class="name">${p.name}</h2>
@@ -308,7 +211,7 @@ function makeCard(p){
     <div class="stepper">
       <button type="button" class="dec" aria-label="減少「${p.name}」數量">−</button>
       <input class="qty-input" type="number" min="0" max="${p.limited}" step="1" inputmode="numeric"
-             value="${state.qty[p.id]}" aria-label="「${p.name}」數量">
+             value="${state.qty[p.code]}" aria-label="「${p.name}」數量">
       <button type="button" class="inc" aria-label="增加「${p.name}」數量">+</button>
     </div>
   `;
@@ -319,7 +222,7 @@ function makeCard(p){
 
   function setQty(n){
     n = Math.max(0, Math.min(p.limited, Math.floor(Number.isFinite(n) ? n : 0)));
-    state.qty[p.id] = n;
+    state.qty[p.code] = n;
     input.value = n;
     card.classList.toggle('has-qty', n > 0);
     inc.disabled = n >= p.limited;
@@ -327,12 +230,12 @@ function makeCard(p){
     updateTicket();
   }
 
-  dec.addEventListener('click', () => setQty(state.qty[p.id] - 1));
-  inc.addEventListener('click', () => setQty(state.qty[p.id] + 1));
+  dec.addEventListener('click', () => setQty(state.qty[p.code] - 1));
+  inc.addEventListener('click', () => setQty(state.qty[p.code] + 1));
   input.addEventListener('input', () => setQty(parseInt(input.value, 10)));
   input.addEventListener('blur', () => setQty(parseInt(input.value, 10) || 0));
 
-  setQty(state.qty[p.id]);
+  setQty(state.qty[p.code]);
   return card;
 }
 
@@ -394,7 +297,7 @@ function renderCatalog(){
 
 function computeCart(){
   const lines = PRODUCTS
-    .map(p => ({ ...p, qty: state.qty[p.id] }))
+    .map(p => ({ ...p, qty: state.qty[p.code] }))
     .filter(l => l.qty > 0);
 
   const totalItems = lines.reduce((sum, l) => sum + l.qty, 0);
@@ -417,7 +320,7 @@ function updateTicket(){
     lines.forEach(l => {
       const row = document.createElement('div');
       row.className = 'item-row';
-      const line1 =(l.series === l.name ? [l.category, l.series]: [l.category, l.series, l.name]).filter(Boolean).join('．');
+      const line1 = [l.code, ...(l.series === l.name ? [l.category, l.series]: [l.category, l.series, l.name])].filter(Boolean).join('．');
       const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries]: [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
       row.innerHTML = `
         <div class="item-lines">
@@ -466,8 +369,9 @@ function exportCart(){
   }
 
   const rows = [
-    ['分類', '作品', '名稱', '原文分類', '原文作品', '原文名稱', '單價', '數量', '小計'],
+    ['編號', '分類', '作品', '名稱', '原文分類', '原文作品', '原文名稱', '單價', '數量', '小計'],
     ...lines.map(l => [
+      l.code,
       l.category, l.series || '', l.name,
       l.subcategory || '', l.subseries || '', l.subname || '',
       l.price, l.qty, l.qty * l.price,
@@ -498,7 +402,7 @@ function orderPageHtml(){
   const giftCount = Math.min(GIFT_MAX, Math.floor(totalAmount / GIFT_TIER_AMOUNT));
 
   const itemRows = lines.map(l => {
-    const line1 = (l.series === l.name ? [l.category, l.series] : [l.category, l.series, l.name]).filter(Boolean).join('．');
+    const line1 = [l.code, ...(l.series === l.name ? [l.category, l.series] : [l.category, l.series, l.name])].filter(Boolean).join('．');
     const line2 = (l.subseries === l.subname ? [l.subcategory, l.subseries] : [l.subcategory, l.subseries, l.subname]).filter(Boolean).join('．');
     return `
       <div class="item-row">
@@ -609,33 +513,35 @@ function importCart(file){
   reader.onload = () => {
     const text = String(reader.result).replace(/^﻿/, '');
     const rawLines = text.split(/\r\n|\n/);
+    // 新版 CSV 第一欄是「編號」；沒有編號欄位的舊版 CSV 第一欄就是分類，欄位需往後推移比對。
+    const hasCodeColumn = parseCsvLine(rawLines[0] || '')[0] === '編號';
     const lines = rawLines.slice(1); // skip header row
 
-    const qtyById = Object.fromEntries(PRODUCTS.map(p => [p.id, 0]));
+    const qtyByCode = Object.fromEntries(PRODUCTS.map(p => [p.code, 0]));
     let importedCount = 0;
     let notFoundCount = 0;
 
     for (const line of lines){
       if (!line.trim()) break;
       const cells = parseCsvLine(line);
-      const [category, series, name, , , , , qtyStr] = cells;
+      const [code, category, series, name, , , , , qtyStr] = hasCodeColumn ? cells : [null, ...cells];
       if (category === '總件數' || category === '總金額') break;
 
       const qty = parseInt(qtyStr, 10);
       if (!qty) continue;
 
-      const product = PRODUCTS.find(p =>
-        p.category === category && (p.series || '') === series && p.name === name
-      );
+      // 優先用固定編號比對；找不到編號欄位（舊版 CSV）時，退回用分類+作品+名稱字串比對。
+      const product = (code && PRODUCTS.find(p => p.code === code))
+        || PRODUCTS.find(p => p.category === category && (p.series || '') === series && p.name === name);
       if (product){
-        qtyById[product.id] = Math.min(qty, product.limited);
+        qtyByCode[product.code] = Math.min(qty, product.limited);
         importedCount++;
       } else {
         notFoundCount++;
       }
     }
 
-    state.qty = qtyById;
+    state.qty = qtyByCode;
     renderCatalog();
     updateTicket();
 
